@@ -25,3 +25,12 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+ext {
+    rxjavaVersion = '2.2.0'
+    rxKotlinVersion = '2.2.0'
+    rxandroidVersion = '2.0.2'
+    retrofitVersion = '2.4.0'
+    retrofixRxJavaVersion = '2.4.0'
+    daggerVersion = "2.16"
+}
