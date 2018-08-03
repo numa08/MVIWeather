@@ -45,6 +45,7 @@ dependencies {
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'com.willowtreeapps.assertk:assertk:0.10'
+    testImplementation 'com.nhaarman.mockitokotlin2:mockito-kotlin:2.0.0-RC1'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }

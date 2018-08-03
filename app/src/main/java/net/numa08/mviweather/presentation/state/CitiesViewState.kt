@@ -5,7 +5,8 @@ import net.numa08.mviweather.mvibase.MviViewState
 
 data class CitiesViewState(
         val isLoading: Boolean,
-        val cities: List<City>
+        val cities: List<City>,
+        var error: Throwable? = null
 ): MviViewState {
 
     companion object {

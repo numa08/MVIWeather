@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import dagger.android.support.DaggerAppCompatActivity
 import io.reactivex.Observable
+import io.reactivex.disposables.CompositeDisposable
 import net.numa08.mviweather.R
 import net.numa08.mviweather.mvibase.MviView
 import net.numa08.mviweather.presentation.intent.CitiesViewIntent
@@ -20,16 +21,24 @@ class CitiesActivity : DaggerAppCompatActivity(), MviView<CitiesViewIntent, Citi
     private val viewModel: CitiesViewModel by lazy(LazyThreadSafetyMode.NONE) {
         ViewModelProviders.of(this, viewModelFactory).get(CitiesViewModel::class.java)
     }
+    private val disposables = CompositeDisposable()
 
     override fun intents(): Observable<CitiesViewIntent>
         = Observable.just(CitiesViewIntent.InitialIntent)
 
     override fun render(state: CitiesViewState) {
+        Log.d("test", "$state")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_cities)
-        Log.d("test","hoge $viewModel")
+        disposables.add(viewModel.states().subscribe(::render))
+        viewModel.processIntents(intents())
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        disposables.dispose()
     }
 }

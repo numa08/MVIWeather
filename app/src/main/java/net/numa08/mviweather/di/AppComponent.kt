@@ -6,13 +6,16 @@ import dagger.android.AndroidInjector
 import dagger.android.support.AndroidSupportInjectionModule
 import net.numa08.mviweather.di.activitymodule.CitiesActivityBuilder
 import net.numa08.mviweather.presentation.App
+import javax.inject.Singleton
 
 @Component(modules = [
     AndroidSupportInjectionModule::class,
     NetworkModule::class,
     ViewModelModule::class,
-    CitiesActivityBuilder::class
+    CitiesActivityBuilder::class,
+    AppModule::class
 ])
+@Singleton
 interface AppComponent: AndroidInjector<App>{
 
     @Component.Builder

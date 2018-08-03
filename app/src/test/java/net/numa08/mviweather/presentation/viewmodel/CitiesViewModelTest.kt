@@ -4,22 +4,62 @@ package net.numa08.mviweather.presentation.viewmodel
 
 import assertk.assert
 import assertk.assertions.isEqualTo
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.schedulers.TestScheduler
 import net.numa08.mviweather.data.City
+import net.numa08.mviweather.data.source.CitiesDataSource
 import net.numa08.mviweather.presentation.intent.CitiesViewIntent
 import net.numa08.mviweather.presentation.result.CitiesViewResult
 import net.numa08.mviweather.presentation.state.CitiesViewState
+import net.numa08.mviweather.utils.TestSchedulerProvider
 import org.junit.Before
 import org.junit.Test
+import org.mockito.Mock
 
 class CitiesViewModelTest {
 
-    lateinit var viewMode: CitiesViewModel
+
+    @Mock
+    private val dataSource: CitiesDataSource = mock()
+
+    lateinit var viewModel: CitiesViewModel
 
     @Before
     fun initViewModel() {
-        viewMode = CitiesViewModel()
+        viewModel = CitiesViewModel(dataSource, TestSchedulerProvider())
+    }
+
+    @Test
+    fun `読み込み中にエラーが発生した場合`() {
+        val error = RuntimeException("error")
+        val response = Single.error<List<City>>(error)
+        whenever(dataSource.getCities()).thenReturn(response)
+
+        val scheduler = TestScheduler()
+        val subscriber = viewModel.states().subscribeOn(scheduler).test()
+        viewModel.processIntents(Observable.just(CitiesViewIntent.InitialIntent))
+        scheduler.triggerActions()
+
+        val expected = CitiesViewState(isLoading = false, cities = emptyList(), error = error)
+        subscriber.assertValue(expected)
+    }
+
+    @Test
+    fun  `読み込みに成功した場合`() {
+        val cities = listOf(City("東京", "tokyo"))
+        val response = Single.just(cities)
+        whenever(dataSource.getCities()).thenReturn(response)
+
+        val scheduler = TestScheduler()
+        val subscriber = viewModel.states().subscribeOn(scheduler).test()
+        viewModel.processIntents(Observable.just(CitiesViewIntent.InitialIntent))
+        scheduler.triggerActions()
+
+        val expected = CitiesViewState(isLoading = false, cities = cities)
+        subscriber.assertValue(expected)
     }
 
     @Test
@@ -27,8 +67,8 @@ class CitiesViewModelTest {
         val expected = CitiesViewState(isLoading = true, cities = emptyList())
 
         val scheduler = TestScheduler()
-        val subscriber = viewMode.states().subscribeOn(scheduler).test()
-        viewMode.processIntents(Observable.just(CitiesViewIntent.InitialIntent))
+        val subscriber = viewModel.states().subscribeOn(scheduler).test()
+        viewModel.processIntents(Observable.just(CitiesViewIntent.InitialIntent))
         scheduler.triggerActions()
         subscriber.assertValue(expected)
     }

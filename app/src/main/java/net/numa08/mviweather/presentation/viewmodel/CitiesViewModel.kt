@@ -5,15 +5,20 @@ import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.functions.BiFunction
 import io.reactivex.subjects.PublishSubject
+import net.numa08.mviweather.data.source.CitiesDataSource
 import net.numa08.mviweather.mvibase.MviViewModel
 import net.numa08.mviweather.presentation.action.CitiesViewAction
 import net.numa08.mviweather.presentation.intent.CitiesViewIntent
 import net.numa08.mviweather.presentation.result.CitiesViewResult
 import net.numa08.mviweather.presentation.state.CitiesViewState
+import net.numa08.mviweather.utils.SchedulerProvider
 import net.numa08.mviweather.utils.notOfType
 import javax.inject.Inject
 
-class CitiesViewModel @Inject constructor(): ViewModel(), MviViewModel<CitiesViewIntent, CitiesViewState> {
+class CitiesViewModel @Inject constructor(
+        private val citiesDataSource: CitiesDataSource,
+        private val schedulerProvider: SchedulerProvider
+): ViewModel(), MviViewModel<CitiesViewIntent, CitiesViewState> {
 
     private val intentSubject: PublishSubject<CitiesViewIntent> = PublishSubject.create()
     private val stateObserver: Observable<CitiesViewState> = compose()
@@ -34,16 +39,32 @@ class CitiesViewModel @Inject constructor(): ViewModel(), MviViewModel<CitiesVie
 
     override fun states(): Observable<CitiesViewState> = stateObserver
 
-    val actionFromIntent
+    private val actionFromIntent
         get() = { intent: CitiesViewIntent ->
             when (intent) {
                 CitiesViewIntent.InitialIntent -> CitiesViewAction.LoadCitiesAction
             }
         }
 
-    val processAction: ObservableTransformer<CitiesViewAction, CitiesViewResult>
-        get() = ObservableTransformer { action ->
-            Observable.just(CitiesViewResult.LoadCitiesResult.InFlight)
+    private val loadCitiesProcessor = { _: CitiesViewAction.LoadCitiesAction ->
+        citiesDataSource
+                .getCities()
+                .toObservable()
+                .map { CitiesViewResult.LoadCitiesResult.Success(it) }
+                .cast(CitiesViewResult.LoadCitiesResult::class.java)
+                .onErrorReturn(CitiesViewResult.LoadCitiesResult::Failure)
+                .subscribeOn(schedulerProvider.io())
+                .observeOn(schedulerProvider.ui())
+                .startWith(CitiesViewResult.LoadCitiesResult.InFlight)
+    }
+
+    private val processAction: ObservableTransformer<CitiesViewAction, CitiesViewResult>
+        get() = ObservableTransformer { actions ->
+            actions.flatMap { action ->
+                when(action) {
+                    is CitiesViewAction.LoadCitiesAction -> loadCitiesProcessor(action)
+                }
+            }
         }
 
     private fun compose(): Observable<CitiesViewState> {
@@ -63,7 +84,7 @@ class CitiesViewModel @Inject constructor(): ViewModel(), MviViewModel<CitiesVie
                 is CitiesViewResult.LoadCitiesResult -> when(result) {
                     is CitiesViewResult.LoadCitiesResult.InFlight -> previousState.copy(isLoading = true)
                     is CitiesViewResult.LoadCitiesResult.Success -> previousState.copy(isLoading = false, cities = result.cities)
-                    is CitiesViewResult.LoadCitiesResult.Failure -> previousState.copy(isLoading = false)
+                    is CitiesViewResult.LoadCitiesResult.Failure -> previousState.copy(isLoading = false, error = result.error)
                 }
             }
 
