@@ -11,7 +11,10 @@ import dagger.android.support.DaggerFragment
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import net.numa08.mviweather.R
+import net.numa08.mviweather.data.HepburnName
 import net.numa08.mviweather.mvibase.MviView
+import net.numa08.mviweather.presentation.NavigationController
+import net.numa08.mviweather.presentation.NavigationEvent
 import net.numa08.mviweather.presentation.adapter.CitiesAdapter
 import net.numa08.mviweather.presentation.intent.CitiesViewIntent
 import net.numa08.mviweather.presentation.state.CitiesViewState
@@ -22,6 +25,9 @@ class CitiesFragment : DaggerFragment(), MviView<CitiesViewIntent, CitiesViewSta
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
+    @Inject
+    lateinit var navigationController: NavigationController
+
     private val viewModel: CitiesViewModel by lazy(LazyThreadSafetyMode.NONE) {
         ViewModelProviders.of(this, viewModelFactory).get(CitiesViewModel::class.java)
     }
@@ -50,6 +56,7 @@ class CitiesFragment : DaggerFragment(), MviView<CitiesViewIntent, CitiesViewSta
     private fun bind() {
         disposables.add(viewModel.states().subscribe(::render))
         viewModel.processIntents(intents())
+        disposables.add(adapter.citySelectedObserver.subscribe { showCityWeatherDetail(it.nameAsHepburn) })
     }
 
     override fun intents(): Observable<CitiesViewIntent> = Observable.just(CitiesViewIntent.InitialIntent)
@@ -61,4 +68,7 @@ class CitiesFragment : DaggerFragment(), MviView<CitiesViewIntent, CitiesViewSta
         }
     }
 
+    private fun showCityWeatherDetail(name: HepburnName) {
+        navigationController.navigateTo(NavigationEvent.WeatherDetailForCity(name))
+    }
 }
