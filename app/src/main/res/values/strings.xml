@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">MVIWeather</string>
+    <string name="hello">Will show number of button clicked</string>
+    <string name="number_of_count">Count %d</string>
+    <string name="button_message">Click Me</string>
 </resources>
