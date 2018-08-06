@@ -11,7 +11,7 @@ import dagger.android.support.DaggerFragment
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import net.numa08.mviweather.R
-import net.numa08.mviweather.data.HepburnName
+import net.numa08.mviweather.data.City
 import net.numa08.mviweather.mvibase.MviView
 import net.numa08.mviweather.presentation.NavigationController
 import net.numa08.mviweather.presentation.NavigationEvent
@@ -56,7 +56,7 @@ class CitiesFragment : DaggerFragment(), MviView<CitiesViewIntent, CitiesViewSta
     private fun bind() {
         disposables.add(viewModel.states().subscribe(::render))
         viewModel.processIntents(intents())
-        disposables.add(adapter.citySelectedObserver.subscribe { showCityWeatherDetail(it.nameAsHepburn) })
+        disposables.add(adapter.citySelectedObserver.subscribe { showCityWeatherDetail(it) })
     }
 
     override fun intents(): Observable<CitiesViewIntent> = Observable.just(CitiesViewIntent.InitialIntent)
@@ -68,7 +68,7 @@ class CitiesFragment : DaggerFragment(), MviView<CitiesViewIntent, CitiesViewSta
         }
     }
 
-    private fun showCityWeatherDetail(name: HepburnName) {
-        navigationController.navigateTo(NavigationEvent.WeatherDetailForCity(name))
+    private fun showCityWeatherDetail(city: City) {
+        navigationController.navigateTo(NavigationEvent.WeatherDetailForCity(city))
     }
 }

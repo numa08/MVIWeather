@@ -2,7 +2,7 @@ package net.numa08.mviweather.presentation
 
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
-import net.numa08.mviweather.data.HepburnName
+import net.numa08.mviweather.data.City
 import net.numa08.mviweather.utils.SchedulerProvider
 
 interface NavigationController {
@@ -11,7 +11,7 @@ interface NavigationController {
 }
 
 sealed class NavigationEvent {
-    class WeatherDetailForCity(val name: HepburnName) : NavigationEvent()
+    class WeatherDetailForCity(val city: City) : NavigationEvent()
 }
 
 class AppNavigationController constructor(

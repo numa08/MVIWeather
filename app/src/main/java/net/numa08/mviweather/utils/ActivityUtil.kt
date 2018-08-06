@@ -8,9 +8,11 @@ import android.support.v4.app.FragmentManager
 fun addFragmentToActivity(
         fragmentManager: FragmentManager,
         fragment: Fragment,
-        frameId: Int) {
+        frameId: Int,
+        backStackId: String? = null) {
     fragmentManager.beginTransaction().run {
         add(frameId, fragment)
+        addToBackStack(backStackId)
         commit()
     }
 }
