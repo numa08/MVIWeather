@@ -9,7 +9,9 @@ import dagger.multibindings.IntoMap
 import net.numa08.mviweather.di.ViewModelKey
 import net.numa08.mviweather.presentation.activity.MainActivity
 import net.numa08.mviweather.presentation.fragment.CitiesFragment
+import net.numa08.mviweather.presentation.fragment.CityDetailFragment
 import net.numa08.mviweather.presentation.viewmodel.CitiesViewModel
+import net.numa08.mviweather.presentation.viewmodel.CityDetailViewModel
 
 @Module
 interface MainActivityModule {
@@ -20,9 +22,17 @@ interface MainActivityModule {
     @ContributesAndroidInjector
     fun contributeCitiesFragment(): CitiesFragment
 
+    @ContributesAndroidInjector
+    fun contributeCityDetailFragment(): CityDetailFragment
+
     @Binds
     @IntoMap
     @ViewModelKey(CitiesViewModel::class)
     fun bindCitiesViewModel(viewModel: CitiesViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(CityDetailViewModel::class)
+    fun bindCityDetailViewModel(viewModel: CityDetailViewModel): ViewModel
 
 }

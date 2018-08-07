@@ -2,11 +2,17 @@ package net.numa08.mviweather.di
 
 import dagger.Module
 import dagger.Provides
+import net.numa08.mviweather.BuildConfig
 import net.numa08.mviweather.api.city.Endpoint
 import net.numa08.mviweather.data.source.CitiesDataSource
+import net.numa08.mviweather.data.source.WeatherDataSourece
 import net.numa08.mviweather.data.source.city.remote.RemoteCitiesSource
+import net.numa08.mviweather.data.source.openwhathermap.remote.RemoteOpenWeatherMapDataSource
 import net.numa08.mviweather.utils.parser.CitiesCSVParser
 import net.numa08.mviweather.utils.parser.CitiesResponseBodyConverter
+import net.numa08.openweathermaplib.Lang
+import net.numa08.openweathermaplib.Units
+import net.numa08.openweathermaplib.implementation.OpenWeatherMapHelper
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
@@ -39,4 +45,16 @@ open class NetworkModule {
 
     @Singleton @Provides
     open fun provideCitiesDataSource(endpoint: Endpoint): CitiesDataSource = RemoteCitiesSource(endpoint)
+
+    @Singleton
+    @Provides
+    open fun provideOpenWeathermMapHelper(): OpenWeatherMapHelper = OpenWeatherMapHelper().also {
+        it.setApiKey(BuildConfig.OPENWEATHER_MAP_API_KEY)
+        it.setUnits(Units.METRIC)
+        it.setLang(Lang.JAPANESE)
+    }
+
+    @Singleton
+    @Provides
+    open fun providesWeatherDataSource(helper: OpenWeatherMapHelper): WeatherDataSourece = RemoteOpenWeatherMapDataSource(helper)
 }
