@@ -23,22 +23,17 @@ class HelloViewModelTest {
         // 期待される初期状態
         val expected = HelloViewState(numberOfButtonClicked = null, showInitialMessage = true)
 
-        val scheduler = TestScheduler()
-        val subscriber = viewModel.states().subscribeOn(scheduler).test()
+        val subscriber = viewModel.states().test()
         // InitialIntent を発行する
         viewModel.processIntents(Observable.just(HelloViewIntent.InitialIntent))
         // Intent を処理させる
-        scheduler.triggerActions()
         subscriber.assertValue(expected)
     }
 
     @Test
     fun `ボタンを押した回数がインクリメントされること`() {
         // ボタンを3回クリックされた状態
-        val expected = HelloViewState(numberOfButtonClicked = 3, showInitialMessage = false)
-
-        val scheduler = TestScheduler()
-        val subscriber = viewModel.states().subscribeOn(scheduler).test()
+        val subscriber = viewModel.states().test()
         // 初期状態→ボタンクリック*3 を実行する
         viewModel.processIntents(
                 Observable.fromArray(
@@ -48,8 +43,12 @@ class HelloViewModelTest {
                         HelloViewIntent.IncrementCountIntent
                 )
         )
-        scheduler.triggerActions()
-        subscriber.assertValue(expected)
+        subscriber.assertValues(
+                HelloViewState.initial(),
+                HelloViewState(numberOfButtonClicked = 1, showInitialMessage = false),
+                HelloViewState(numberOfButtonClicked = 2, showInitialMessage = false),
+                HelloViewState(numberOfButtonClicked = 3, showInitialMessage = false)
+        )
     }
 
 }

@@ -8,7 +8,6 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Observable
 import io.reactivex.Single
-import io.reactivex.schedulers.TestScheduler
 import net.numa08.mviweather.data.City
 import net.numa08.mviweather.data.source.CitiesDataSource
 import net.numa08.mviweather.presentation.intent.CitiesViewIntent
@@ -25,7 +24,7 @@ class CitiesViewModelTest {
     @Mock
     private val dataSource: CitiesDataSource = mock()
 
-    lateinit var viewModel: CitiesViewModel
+    private lateinit var viewModel: CitiesViewModel
 
     @Before
     fun initViewModel() {
@@ -38,13 +37,13 @@ class CitiesViewModelTest {
         val response = Single.error<List<City>>(error)
         whenever(dataSource.getCities()).thenReturn(response)
 
-        val scheduler = TestScheduler()
-        val subscriber = viewModel.states().subscribeOn(scheduler).test()
+        val subscriber = viewModel.states().test()
         viewModel.processIntents(Observable.just(CitiesViewIntent.InitialIntent))
-        scheduler.triggerActions()
 
-        val expected = CitiesViewState(isLoading = false, cities = emptyList(), error = error)
-        subscriber.assertValue(expected)
+        subscriber.assertValues(
+                CitiesViewState(isLoading = true, cities = emptyList(), error = null),
+                CitiesViewState(isLoading = false, cities = emptyList(), error = error)
+        )
     }
 
     @Test
@@ -53,23 +52,21 @@ class CitiesViewModelTest {
         val response = Single.just(cities)
         whenever(dataSource.getCities()).thenReturn(response)
 
-        val scheduler = TestScheduler()
-        val subscriber = viewModel.states().subscribeOn(scheduler).test()
+        val subscriber = viewModel.states().test()
         viewModel.processIntents(Observable.just(CitiesViewIntent.InitialIntent))
-        scheduler.triggerActions()
 
-        val expected = CitiesViewState(isLoading = false, cities = cities)
-        subscriber.assertValue(expected)
+        subscriber.assertValues(
+                CitiesViewState(isLoading = true, cities = emptyList(), error = null),
+                CitiesViewState(isLoading = false, cities = cities)
+        )
     }
 
     @Test
     fun `初期状態の state をテスト`() {
         val expected = CitiesViewState(isLoading = true, cities = emptyList())
 
-        val scheduler = TestScheduler()
-        val subscriber = viewModel.states().subscribeOn(scheduler).test()
+        val subscriber = viewModel.states().test()
         viewModel.processIntents(Observable.just(CitiesViewIntent.InitialIntent))
-        scheduler.triggerActions()
         subscriber.assertValue(expected)
     }
 

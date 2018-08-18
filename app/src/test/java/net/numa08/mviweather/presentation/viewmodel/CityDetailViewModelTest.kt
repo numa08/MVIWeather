@@ -11,6 +11,7 @@ import io.reactivex.schedulers.TestScheduler
 import net.numa08.mviweather.data.City
 import net.numa08.mviweather.data.source.WeatherDataSourece
 import net.numa08.mviweather.presentation.intent.CityDetailViewIntent
+import net.numa08.mviweather.presentation.state.CitiesViewState
 import net.numa08.mviweather.presentation.state.CityDetailViewState
 import net.numa08.mviweather.utils.TestSchedulerProvider
 import net.numa08.openweathermaplib.models.common.Weather
@@ -25,7 +26,7 @@ class CityDetailViewModelTest {
     @Mock
     private val dataSource: WeatherDataSourece = mock()
 
-    lateinit var viewModel: CityDetailViewModel
+    private lateinit var viewModel: CityDetailViewModel
 
     @Before
     fun initViewModel() {
@@ -38,16 +39,16 @@ class CityDetailViewModelTest {
         val response = Single.error<ThreeHourForecast>(error)
         whenever(dataSource.getThreeHourForecastByCityName(any())).thenReturn(response)
 
-        val scheduler = TestScheduler()
-        val subscriber = viewModel.states().subscribeOn(scheduler).test()
+        val subscriber = viewModel.states().test()
         val city = City("東京", "tokyo")
         viewModel.processIntents(
                 Observable.just(
                         CityDetailViewIntent.InitialIntent(city)))
-        scheduler.triggerActions()
-
-        val expected = CityDetailViewState(city, forecast = null, error = error, isLoading = false)
-        subscriber.assertValue(expected)
+        subscriber.assertValues(
+                CityDetailViewState.idle(),
+                CityDetailViewState(city, forecast = null, error = null, isLoading = true),
+                CityDetailViewState(city, forecast = null, error = error, isLoading = false)
+        )
     }
 
     @Test
@@ -71,17 +72,18 @@ class CityDetailViewModelTest {
         val response = Single.just(forecast)
         whenever(dataSource.getThreeHourForecastByCityName(any())).thenReturn(response)
 
-        val scheduler = TestScheduler()
-        val subscriber = viewModel.states().subscribeOn(scheduler).test()
+        val subscriber = viewModel.states().test()
         val city = City("東京", "tokyo")
         viewModel.processIntents(
                 Observable.just(
                         CityDetailViewIntent.InitialIntent(city)
                 )
         )
-        scheduler.triggerActions()
-        val expected = CityDetailViewState(city, forecast = forecast, error = null, isLoading = false)
-        subscriber.assertValue(expected)
+        subscriber.assertValues(
+                CityDetailViewState.idle(),
+                CityDetailViewState(city, forecast = null, error = null, isLoading = true),
+                CityDetailViewState(city, forecast = forecast, error = null, isLoading = false)
+        )
     }
 
 }
