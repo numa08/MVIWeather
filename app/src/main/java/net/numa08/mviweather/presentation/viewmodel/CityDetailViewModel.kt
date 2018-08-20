@@ -5,7 +5,7 @@ import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.functions.BiFunction
 import io.reactivex.subjects.PublishSubject
-import net.numa08.mviweather.data.source.WeatherDataSourece
+import net.numa08.mviweather.data.source.WeatherDataSource
 import net.numa08.mviweather.mvibase.MviViewModel
 import net.numa08.mviweather.presentation.action.CityDetailViewAction
 import net.numa08.mviweather.presentation.intent.CityDetailViewIntent
@@ -16,7 +16,7 @@ import net.numa08.mviweather.utils.notOfType
 import javax.inject.Inject
 
 class CityDetailViewModel @Inject constructor(
-        private val weatherDataSource: WeatherDataSourece,
+        private val weatherDataSource: WeatherDataSource,
         private val schedulerProvider: SchedulerProvider
 ) : ViewModel(), MviViewModel<CityDetailViewIntent, CityDetailViewState> {
 

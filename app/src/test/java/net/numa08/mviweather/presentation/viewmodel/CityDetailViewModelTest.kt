@@ -7,11 +7,9 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Observable
 import io.reactivex.Single
-import io.reactivex.schedulers.TestScheduler
 import net.numa08.mviweather.data.City
-import net.numa08.mviweather.data.source.WeatherDataSourece
+import net.numa08.mviweather.data.source.WeatherDataSource
 import net.numa08.mviweather.presentation.intent.CityDetailViewIntent
-import net.numa08.mviweather.presentation.state.CitiesViewState
 import net.numa08.mviweather.presentation.state.CityDetailViewState
 import net.numa08.mviweather.utils.TestSchedulerProvider
 import net.numa08.openweathermaplib.models.common.Weather
@@ -24,7 +22,7 @@ import org.mockito.Mock
 class CityDetailViewModelTest {
 
     @Mock
-    private val dataSource: WeatherDataSourece = mock()
+    private val dataSource: WeatherDataSource = mock()
 
     private lateinit var viewModel: CityDetailViewModel
 

@@ -2,12 +2,12 @@ package net.numa08.mviweather.data.source.openwhathermap.remote
 
 import io.reactivex.Single
 import net.numa08.mviweather.data.HepburnName
-import net.numa08.mviweather.data.source.WeatherDataSourece
+import net.numa08.mviweather.data.source.WeatherDataSource
 import net.numa08.openweathermaplib.implementation.OpenWeatherMapHelper
 import net.numa08.openweathermaplib.models.currentweather.CurrentWeather
 import net.numa08.openweathermaplib.models.threehourforecast.ThreeHourForecast
 
-class RemoteOpenWeatherMapDataSource(private val helper: OpenWeatherMapHelper) : WeatherDataSourece {
+class RemoteOpenWeatherMapDataSource(private val helper: OpenWeatherMapHelper) : WeatherDataSource {
 
     override fun getCurrentWeatherByCityName(cityName: HepburnName): Single<CurrentWeather> = Single.create { source ->
         helper.getCurrentWeatherByCityName(cityName, object : OpenWeatherMapHelper.CurrentWeatherCallback {

@@ -5,7 +5,7 @@ import dagger.Provides
 import net.numa08.mviweather.BuildConfig
 import net.numa08.mviweather.api.city.Endpoint
 import net.numa08.mviweather.data.source.CitiesDataSource
-import net.numa08.mviweather.data.source.WeatherDataSourece
+import net.numa08.mviweather.data.source.WeatherDataSource
 import net.numa08.mviweather.data.source.city.remote.RemoteCitiesSource
 import net.numa08.mviweather.data.source.openwhathermap.remote.RemoteOpenWeatherMapDataSource
 import net.numa08.mviweather.utils.parser.CitiesCSVParser
@@ -56,5 +56,5 @@ open class NetworkModule {
 
     @Singleton
     @Provides
-    open fun providesWeatherDataSource(helper: OpenWeatherMapHelper): WeatherDataSourece = RemoteOpenWeatherMapDataSource(helper)
+    open fun providesWeatherDataSource(helper: OpenWeatherMapHelper): WeatherDataSource = RemoteOpenWeatherMapDataSource(helper)
 }

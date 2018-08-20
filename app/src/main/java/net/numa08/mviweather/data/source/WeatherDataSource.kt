@@ -5,7 +5,7 @@ import net.numa08.mviweather.data.HepburnName
 import net.numa08.openweathermaplib.models.currentweather.CurrentWeather
 import net.numa08.openweathermaplib.models.threehourforecast.ThreeHourForecast
 
-interface WeatherDataSourece {
+interface WeatherDataSource {
     fun getCurrentWeatherByCityName(cityName: HepburnName): Single<CurrentWeather>
     fun getThreeHourForecastByCityName(cityName: HepburnName): Single<ThreeHourForecast>
 }
