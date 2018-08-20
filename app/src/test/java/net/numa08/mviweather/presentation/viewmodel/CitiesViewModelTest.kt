@@ -41,8 +41,8 @@ class CitiesViewModelTest {
         viewModel.processIntents(Observable.just(CitiesViewIntent.InitialIntent))
 
         subscriber.assertValues(
-                CitiesViewState(isLoading = true, cities = emptyList(), error = null),
-                CitiesViewState(isLoading = false, cities = emptyList(), error = error)
+                CitiesViewState(isLoading = true, cityWeathers = emptyList(), error = null),
+                CitiesViewState(isLoading = false, cityWeathers = emptyList(), error = error)
         )
     }
 
@@ -56,14 +56,14 @@ class CitiesViewModelTest {
         viewModel.processIntents(Observable.just(CitiesViewIntent.InitialIntent))
 
         subscriber.assertValues(
-                CitiesViewState(isLoading = true, cities = emptyList(), error = null),
-                CitiesViewState(isLoading = false, cities = cities)
+                CitiesViewState(isLoading = true, cityWeathers = emptyList(), error = null),
+                CitiesViewState(isLoading = false, cityWeathers = cities.map { it to null })
         )
     }
 
     @Test
     fun `初期状態の state をテスト`() {
-        val expected = CitiesViewState(isLoading = true, cities = emptyList())
+        val expected = CitiesViewState(isLoading = true, cityWeathers = emptyList())
 
         val subscriber = viewModel.states().test()
         viewModel.processIntents(Observable.just(CitiesViewIntent.InitialIntent))
@@ -81,7 +81,7 @@ class CitiesViewModelTest {
     fun `読み込み成功のreducer`() {
         val result = CitiesViewResult.LoadCitiesResult.Success(listOf(City("東京", "tokyo")))
         val actual = CitiesViewModel.reducer.apply(CitiesViewState.idle(), result)
-        val expected = CitiesViewState(false, listOf(City("東京", "tokyo")))
+        val expected = CitiesViewState(false, listOf(City("東京", "tokyo") to null))
         assert(actual).isEqualTo(expected)
     }
 

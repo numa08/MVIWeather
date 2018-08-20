@@ -83,7 +83,7 @@ class CitiesViewModel @Inject constructor(
             when(result) {
                 is CitiesViewResult.LoadCitiesResult -> when(result) {
                     is CitiesViewResult.LoadCitiesResult.InFlight -> previousState.copy(isLoading = true)
-                    is CitiesViewResult.LoadCitiesResult.Success -> previousState.copy(isLoading = false, cities = result.cities)
+                    is CitiesViewResult.LoadCitiesResult.Success -> previousState.copy(isLoading = false, cityWeathers = result.cities.map { it to null })
                     is CitiesViewResult.LoadCitiesResult.Failure -> previousState.copy(isLoading = false, error = result.error)
                 }
             }

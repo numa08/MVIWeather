@@ -62,9 +62,9 @@ class CitiesFragment : DaggerFragment(), MviView<CitiesViewIntent, CitiesViewSta
     override fun intents(): Observable<CitiesViewIntent> = Observable.just(CitiesViewIntent.InitialIntent)
 
     override fun render(state: CitiesViewState) {
-        if (state.cities.isNotEmpty()) {
+        if (state.cityWeathers.isNotEmpty()) {
             adapter.clear()
-            adapter.addAll(state.cities)
+            adapter.addAll(state.cityWeathers)
         }
     }
 
