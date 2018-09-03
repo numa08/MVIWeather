@@ -3,9 +3,12 @@ package net.numa08.mviweather.presentation.viewmodel
 import android.arch.lifecycle.ViewModel
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
+import io.reactivex.Single
 import io.reactivex.functions.BiFunction
 import io.reactivex.subjects.PublishSubject
+import net.numa08.mviweather.data.City
 import net.numa08.mviweather.data.source.CitiesDataSource
+import net.numa08.mviweather.data.source.WeatherDataSource
 import net.numa08.mviweather.mvibase.MviViewModel
 import net.numa08.mviweather.presentation.action.CitiesViewAction
 import net.numa08.mviweather.presentation.intent.CitiesViewIntent
@@ -17,6 +20,7 @@ import javax.inject.Inject
 
 class CitiesViewModel @Inject constructor(
         private val citiesDataSource: CitiesDataSource,
+        private val weatherDataSource: WeatherDataSource,
         private val schedulerProvider: SchedulerProvider
 ): ViewModel(), MviViewModel<CitiesViewIntent, CitiesViewState> {
 
@@ -33,6 +37,18 @@ class CitiesViewModel @Inject constructor(
             }
         }
 
+    private val getCities: () -> Single<List<City>>
+        get() = {
+            citiesDataSource.getCities()
+        }
+
+    private val getWeather: (City) -> Single<CitiesViewResult.CityWeather>
+        get() = {
+            weatherDataSource.getCurrentWeatherByCityName(cityName = it.nameAsHepburn)
+                    .map { weather -> CitiesViewResult.CityWeather(city = it, weather = weather.weatherArray.first()) }
+                    .onErrorReturn { _ -> CitiesViewResult.CityWeather(it, null) }
+        }
+
     override fun processIntents(intents: Observable<CitiesViewIntent>) {
         intents.subscribe(intentSubject)
     }
@@ -47,10 +63,13 @@ class CitiesViewModel @Inject constructor(
         }
 
     private val loadCitiesProcessor = { _: CitiesViewAction.LoadCitiesAction ->
-        citiesDataSource
-                .getCities()
+        getCities()
                 .toObservable()
-                .map { CitiesViewResult.LoadCitiesResult.Success(it) }
+                .flatMap { cities ->
+                    val observables = cities.map(getWeather).map { it.toObservable() }
+                    Observable.concat(observables)
+                }
+                .map(CitiesViewResult.LoadCitiesResult::Success)
                 .cast(CitiesViewResult.LoadCitiesResult::class.java)
                 .onErrorReturn(CitiesViewResult.LoadCitiesResult::Failure)
                 .subscribeOn(schedulerProvider.io())
@@ -83,7 +102,10 @@ class CitiesViewModel @Inject constructor(
             when(result) {
                 is CitiesViewResult.LoadCitiesResult -> when(result) {
                     is CitiesViewResult.LoadCitiesResult.InFlight -> previousState.copy(isLoading = true)
-                    is CitiesViewResult.LoadCitiesResult.Success -> previousState.copy(isLoading = false, cityWeathers = result.cities.map { it to null })
+                    is CitiesViewResult.LoadCitiesResult.Success -> {
+                        val newList = previousState.cityWeathers + (result.cityWeather.city to result.cityWeather.weather)
+                        previousState.copy(cityWeathers = newList, isLoading = false)
+                    }
                     is CitiesViewResult.LoadCitiesResult.Failure -> previousState.copy(isLoading = false, error = result.error)
                 }
             }

@@ -59,7 +59,8 @@ class CitiesFragment : DaggerFragment(), MviView<CitiesViewIntent, CitiesViewSta
         disposables.add(adapter.citySelectedObserver.subscribe { showCityWeatherDetail(it) })
     }
 
-    override fun intents(): Observable<CitiesViewIntent> = Observable.just(CitiesViewIntent.InitialIntent)
+    override fun intents(): Observable<CitiesViewIntent> =
+            Observable.just(CitiesViewIntent.InitialIntent)
 
     override fun render(state: CitiesViewState) {
         if (state.cityWeathers.isNotEmpty()) {
